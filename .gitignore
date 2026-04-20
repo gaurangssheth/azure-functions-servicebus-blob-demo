@@ -4,3 +4,4 @@ obj/
 local.settings.json
 *.user
 *.suo
+*.PublishSettings
