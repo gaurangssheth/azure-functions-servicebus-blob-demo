@@ -1,0 +1,17 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": false
+      },
+      "enableLiveMetricsFilters": false
+    },
+    "logLevel": {
+      "Default": "Information",
+      "OrderIntegrationFunction": "Debug",
+      "Microsoft": "Warning",
+      "Host": "Information"
+    }
+  }
+}
