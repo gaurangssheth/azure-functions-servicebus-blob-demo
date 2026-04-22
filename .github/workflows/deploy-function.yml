@@ -5,11 +5,49 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      target_environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - dev
+          - qa
+          - prod
 
 jobs:
-  build-and-deploy:
+  build-and-deploy-dev:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: dev
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ vars.DOTNET_VERSION }}
+
+      - name: Build
+        run: dotnet build ${{ vars.PROJECT_PATH }} --configuration Release
+
+      - name: Publish
+        run: dotnet publish ${{ vars.PROJECT_PATH }} --configuration Release --output ./publish
+
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
+          package: ./publish
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+  build-and-deploy-manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
 
     steps:
       - name: Checkout source
