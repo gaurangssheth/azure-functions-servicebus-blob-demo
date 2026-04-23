@@ -129,5 +129,58 @@ namespace OrderIntegrationFunction
             await targetBlob.StartCopyFromUriAsync(sourceBlob.Uri);
             await sourceBlob.DeleteIfExistsAsync();
         }
+
+        // NEW
+        public async Task<bool> IdempotencyMarkerExistsAsync(string correlationId)
+        {
+            var blobConnectionString = Environment.GetEnvironmentVariable("BlobStorageConnection");
+
+            if (string.IsNullOrWhiteSpace(blobConnectionString))
+            {
+                throw new InvalidOperationException("BlobStorageConnection setting is missing.");
+            }
+
+            logger.LogInformation(
+                "Checking idempotency marker for CorrelationId {CorrelationId} in container {ContainerName}",
+                correlationId,
+                blobSettings.IdempotencyContainerName);
+
+            var blobServiceClient = new BlobServiceClient(blobConnectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(blobSettings.IdempotencyContainerName);
+
+            await containerClient.CreateIfNotExistsAsync();
+
+            var markerBlob = containerClient.GetBlobClient($"{correlationId}.json");
+
+            return await markerBlob.ExistsAsync();
+        }
+
+        // NEW
+        public async Task CreateIdempotencyMarkerAsync(string correlationId)
+        {
+            var blobConnectionString = Environment.GetEnvironmentVariable("BlobStorageConnection");
+
+            if (string.IsNullOrWhiteSpace(blobConnectionString))
+            {
+                throw new InvalidOperationException("BlobStorageConnection setting is missing.");
+            }
+
+            logger.LogInformation(
+                "Creating idempotency marker for CorrelationId {CorrelationId} in container {ContainerName}",
+                correlationId,
+                blobSettings.IdempotencyContainerName);
+
+            var blobServiceClient = new BlobServiceClient(blobConnectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(blobSettings.IdempotencyContainerName);
+
+            await containerClient.CreateIfNotExistsAsync();
+
+            var markerBlob = containerClient.GetBlobClient($"{correlationId}.json");
+
+            var content = $"{{\"correlationId\":\"{correlationId}\",\"createdAtUtc\":\"{DateTime.UtcNow:O}\"}}";
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
+
+            await markerBlob.UploadAsync(stream, overwrite: true);
+        }
     }
 }
