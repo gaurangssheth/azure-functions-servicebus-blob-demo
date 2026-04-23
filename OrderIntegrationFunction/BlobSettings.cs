@@ -10,6 +10,7 @@ namespace OrderIntegrationFunction
     {
         public string IncomingContainerName { get; set; } = "orders-incoming";
         public string ProcessedContainerName { get; set; } = "orders-processed";
+        public string IdempotencyContainerName { get; set; } = "orders-idempotency";
         public string FailedContainerName { get; set; } = "orders-failed";
     }
 }
