@@ -1,6 +1,7 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using OrderIntegrationFunction.Services;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;

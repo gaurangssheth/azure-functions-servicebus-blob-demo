@@ -5,12 +5,14 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OrderIntegrationFunction.Functions;
+using OrderIntegrationFunction.Models;
 
-namespace OrderIntegrationFunction
+namespace OrderIntegrationFunction.Services
 {
     public class OrderServiceBusService : IOrderServiceBusService
     {
         private readonly ServiceBusSettings serviceBusSettings;
+        private readonly ServiceBusTopicSettings serviceBusTopicSettings;
         private readonly ILogger<OrderServiceBusService> logger;
 
         public OrderServiceBusService(IOptions<ServiceBusSettings> serviceBusOptions, 
@@ -94,6 +96,46 @@ namespace OrderIntegrationFunction
             var message = new ServiceBusMessage(json)
             {
                 ScheduledEnqueueTime = DateTime.UtcNow.AddSeconds(delaySeconds)
+            };
+
+            await sender.SendMessageAsync(message);
+        }
+
+        // NEW
+        // NEW
+        public async Task PublishOrderCreatedAsync(
+            CreateOrderRequest request,
+            string blobName,
+            string correlationId)
+        {
+            var serviceBusConnection = Environment.GetEnvironmentVariable("ServiceBusConnection");
+
+            if (string.IsNullOrWhiteSpace(serviceBusConnection))
+            {
+                throw new InvalidOperationException("ServiceBusConnection setting is missing.");
+            }
+
+            await using var serviceBusClient = new ServiceBusClient(serviceBusConnection);
+            var sender = serviceBusClient.CreateSender(serviceBusTopicSettings.TopicName);
+
+            var payload = new
+            {
+                customerEmail = request.CustomerEmail,
+                amount = request.Amount,
+                orderStatus = request.OrderStatus,
+                blobName,
+                correlationId,
+                retryCount = 0,
+                createdAtUtc = DateTime.UtcNow
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+
+            var message = new ServiceBusMessage(json)
+            {
+                Subject = "OrderCreated",
+                CorrelationId = correlationId,
+                MessageId = correlationId
             };
 
             await sender.SendMessageAsync(message);
