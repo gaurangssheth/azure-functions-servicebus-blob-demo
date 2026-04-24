@@ -108,11 +108,11 @@ namespace OrderIntegrationFunction.Services
             string blobName,
             string correlationId)
         {
-            var serviceBusConnection = Environment.GetEnvironmentVariable("ServiceBusConnection");
+            var serviceBusConnection = Environment.GetEnvironmentVariable("ServiceBusTopicConnection");
 
             if (string.IsNullOrWhiteSpace(serviceBusConnection))
             {
-                throw new InvalidOperationException("ServiceBusConnection setting is missing.");
+                throw new InvalidOperationException("ServiceBusTopicConnection setting is missing.");
             }
 
             await using var serviceBusClient = new ServiceBusClient(serviceBusConnection);
