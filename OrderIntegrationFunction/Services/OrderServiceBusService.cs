@@ -15,10 +15,13 @@ namespace OrderIntegrationFunction.Services
         private readonly ServiceBusTopicSettings serviceBusTopicSettings;
         private readonly ILogger<OrderServiceBusService> logger;
 
-        public OrderServiceBusService(IOptions<ServiceBusSettings> serviceBusOptions, 
+        public OrderServiceBusService(
+            IOptions<ServiceBusSettings> serviceBusOptions,
+            IOptions<ServiceBusTopicSettings> serviceBusTopicOptions,
             ILogger<OrderServiceBusService> logger)
         {
             serviceBusSettings = serviceBusOptions.Value;
+            serviceBusTopicSettings = serviceBusTopicOptions.Value;
             this.logger = logger;
         }
 
@@ -116,6 +119,10 @@ namespace OrderIntegrationFunction.Services
             }
 
             await using var serviceBusClient = new ServiceBusClient(serviceBusConnection);
+            if (string.IsNullOrWhiteSpace(serviceBusTopicSettings.TopicName))
+            {
+                throw new InvalidOperationException("ServiceBusTopicSettings__TopicName is missing.");
+            }
             var sender = serviceBusClient.CreateSender(serviceBusTopicSettings.TopicName);
 
             var payload = new
