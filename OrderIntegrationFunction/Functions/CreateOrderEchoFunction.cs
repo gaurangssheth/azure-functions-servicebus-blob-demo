@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using OrderIntegrationFunction.Models;
 using OrderIntegrationFunction.Services;
 using System;
 using System.IO;

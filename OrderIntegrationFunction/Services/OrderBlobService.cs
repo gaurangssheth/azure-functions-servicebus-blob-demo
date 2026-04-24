@@ -1,6 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OrderIntegrationFunction.Models;
 using System;
 using System.IO;
 using System.Text;

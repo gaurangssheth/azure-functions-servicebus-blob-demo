@@ -36,7 +36,7 @@ namespace OrderIntegrationFunction.Functions
                 messageId,
                 deliveryCount);
 
-            var payload = JsonSerializer.Deserialize<OrderEchoQueueMessage>(
+            var payload = System.Text.Json.JsonSerializer.Deserialize<OrderEchoQueueMessage>(
                 message,
                 new JsonSerializerOptions
                 {
