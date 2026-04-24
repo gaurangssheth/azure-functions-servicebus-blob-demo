@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace OrderIntegrationFunction
+namespace OrderIntegrationFunction.Services
 {
     public interface IOrderBlobService
     {

@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OrderIntegrationFunction.Models;
+using OrderIntegrationFunction.Services;
 using System;
 using System.IO;
 
@@ -52,6 +54,7 @@ namespace OrderIntegrationFunction
             
             builder.Services.Configure<BlobSettings>(context.Configuration.GetSection("BlobSettings"));
             builder.Services.Configure<ServiceBusSettings>(context.Configuration.GetSection("ServiceBusSettings"));
+            builder.Services.Configure<ServiceBusTopicSettings>(context.Configuration.GetSection("ServiceBusTopicSettings"));
 
             builder.Services.AddSingleton<IOrderBlobService, OrderBlobService>();
             builder.Services.AddSingleton<IOrderServiceBusService, OrderServiceBusService>();
