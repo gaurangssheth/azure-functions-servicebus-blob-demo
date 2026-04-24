@@ -59,6 +59,10 @@ namespace OrderIntegrationFunction.Functions
                 createdAtUtc = DateTime.UtcNow
             };
 
+            request.CorrelationId = correlationId;
+            request.CreatedAtUtc = DateTime.Now;
+            request.RetryCount = 0;
+
             // Publish to topic
             await orderServiceBusService.PublishOrderCreatedAsync(request, blobName, correlationId);
 
