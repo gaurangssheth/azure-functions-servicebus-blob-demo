@@ -8,5 +8,6 @@ namespace OrderIntegrationFunction.Services
         Task SendOrderCreatedAsync(CreateOrderRequest request, string blobName);
         Task RescheduleMessageAsync(object payload, int delaySeconds);
         Task PublishOrderCreatedAsync(CreateOrderRequest request, string blobName, string correlationId);
+        Task PublishOrderNotificationRequiredAsync(CreateOrderRequest request, string blobName, string correlationId);
     }
 }

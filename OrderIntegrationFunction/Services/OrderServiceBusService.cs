@@ -140,10 +140,65 @@ namespace OrderIntegrationFunction.Services
 
             var message = new ServiceBusMessage(json)
             {
-                Subject = "OrderCreated",
+                MessageId = correlationId,
                 CorrelationId = correlationId,
-                MessageId = correlationId
+                Subject = "OrderCreated"
             };
+
+            // NEW - custom properties used by subscription filters
+            message.ApplicationProperties["EventType"] = "BillingRequired";
+            message.ApplicationProperties["OrderStatus"] = request.OrderStatus;
+            message.ApplicationProperties["Amount"] = request.Amount;
+
+            await sender.SendMessageAsync(message);
+        }
+
+        // NEW
+        public async Task PublishOrderNotificationRequiredAsync(
+            CreateOrderRequest request,
+            string blobName,
+            string correlationId)
+        {
+            var connection = Environment.GetEnvironmentVariable("ServiceBusTopicConnection");
+
+            if (string.IsNullOrWhiteSpace(connection))
+            {
+                throw new InvalidOperationException("ServiceBusTopicConnection is missing.");
+            }
+
+            await using var client = new ServiceBusClient(connection);
+
+            if (string.IsNullOrWhiteSpace(serviceBusTopicSettings.TopicName))
+            {
+                throw new InvalidOperationException("ServiceBusTopicSettings__TopicName is missing.");
+            }
+
+            var sender = client.CreateSender(serviceBusTopicSettings.TopicName);
+
+            var payload = new
+            {
+                customerEmail = request.CustomerEmail,
+                amount = request.Amount,
+                orderStatus = request.OrderStatus,
+                blobName,
+                correlationId,
+                eventType = "NotificationRequired",
+                createdAtUtc = DateTime.UtcNow
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+
+            var message = new ServiceBusMessage(json)
+            {
+                MessageId = $"{correlationId}-notification",
+                CorrelationId = correlationId,
+                Subject = "NotificationRequired"
+            };
+
+            // NEW - this must match subscription filter
+            message.ApplicationProperties["EventType"] = "NotificationRequired";
+            message.ApplicationProperties["OrderStatus"] = request.OrderStatus;
+            message.ApplicationProperties["Amount"] = request.Amount;
 
             await sender.SendMessageAsync(message);
         }
