@@ -9,12 +9,12 @@ namespace OrderIntegrationFunction.Functions
 {
     public class ProcessNotificationOrderCreatedFunction
     {
-        [FunctionName("ProcessNotificationOrderCreatedFunction")]
+        [FunctionName("ProcessNotificationOrderCreated")]
         public async Task Run(
             [ServiceBusTrigger(
                 "order-events",
                 "notification-subscription",
-                Connection = "ServiceBusConnection")] string message,
+                Connection = "ServiceBusTopicConnection")] string message,
             int deliveryCount,
             string messageId,
             ILogger log)
