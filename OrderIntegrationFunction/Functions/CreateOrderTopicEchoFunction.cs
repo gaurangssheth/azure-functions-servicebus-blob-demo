@@ -71,6 +71,17 @@ namespace OrderIntegrationFunction.Functions
                 correlationId,
                 blobName);
 
+            // NEW - publish second event for notification subscriber
+            await orderServiceBusService.PublishOrderNotificationRequiredAsync(
+                request,
+                blobName,
+                correlationId);
+
+            log.LogInformation(
+                "NotificationRequired event published to topic. CorrelationId: {CorrelationId}, BlobName: {BlobName}",
+                correlationId,
+                blobName);
+
             return new OkObjectResult(new
             {
                 success = true,
